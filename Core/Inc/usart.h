@@ -33,14 +33,17 @@
 extern UART_HandleTypeDef huart2;
 
 /* USER CODE BEGIN Private defines */
-uint8_t message, message_out[20];
+uint8_t incoming_byte, message_out[20];
+uint8_t buff;
 uint16_t message_out_len;
+int16_t goal_pos[3];
+
 /* USER CODE END Private defines */
 
 void MX_USART2_UART_Init(void);
 
 /* USER CODE BEGIN Prototypes */
-
+void pc_interface();
 /* USER CODE END Prototypes */
 
 #ifdef __cplusplus

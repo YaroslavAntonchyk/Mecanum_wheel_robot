@@ -106,18 +106,57 @@ void HAL_UART_MspDeInit(UART_HandleTypeDef* uartHandle)
 } 
 
 /* USER CODE BEGIN 1 */
+void send_char(char c)
+{
+	HAL_UART_Transmit(&huart2, (uint8_t*)&c, 1, 1000);
+}
+
+int __io_putchar(int c)
+{
+	if(c == '\n')
+		send_char('\r');
+	send_char(c);
+	return c;
+}
+
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {
 	if(huart->Instance == USART2)
 	{
-		if(message == 'q')
-		{
-			message_out_len = sprintf((char *)message_out, "Hello world!\r\n");
-			HAL_UART_Transmit_IT(&huart2, message_out, message_out_len);
-		}
-		HAL_UART_Receive_IT(&huart2, &message, 1);
+		pc_interface();
+		HAL_UART_Receive_IT(&huart2, &incoming_byte, 1);
 	}
 }
+
+void pc_interface()
+{
+	if ((incoming_byte >= 48) && (incoming_byte <= 57))
+		{
+			incoming_byte -= 48;
+			buff = buff*10 + incoming_byte;
+		}
+		else if (incoming_byte == 'x')
+		{
+			goal_pos[0] = buff;
+			buff = 0;
+		}
+		else if (incoming_byte == 'y')
+		{
+			goal_pos[1] = buff;
+			buff = 0;
+		}
+		else if (incoming_byte == 'f')
+		{
+			goal_pos[2] = buff;
+			buff = 0;
+		}
+		else
+			printf("Incorrect input\n");
+}
+
+//send_string(char* data)
+
+
 /* USER CODE END 1 */
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
