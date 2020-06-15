@@ -54,7 +54,7 @@ extern "C" {
 void Error_Handler(void);
 
 /* USER CODE BEGIN EFP */
-
+void control_loop();
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
@@ -86,8 +86,10 @@ void Error_Handler(void);
 #define Z_STEP_GPIO_Port GPIOB
 #define A_DIR_Pin GPIO_PIN_6
 #define A_DIR_GPIO_Port GPIOB
-/* USER CODE BEGIN Private defines */
 
+/* USER CODE BEGIN Private defines */
+volatile int vx, vy, vz, va;
+volatile int x_vel, y_vel, fi_vel;
 /* USER CODE END Private defines */
 
 #ifdef __cplusplus

@@ -151,11 +151,11 @@ void pc_interface()
 			buff = 0;
 		}
 		else
+		{
 			printf("Incorrect input\n");
+			buff = 0;
+		}
 }
-
-//send_string(char* data)
-
 
 /* USER CODE END 1 */
 
