@@ -86,7 +86,6 @@ void control_loop();
 #define Z_STEP_GPIO_Port GPIOB
 #define A_DIR_Pin GPIO_PIN_6
 #define A_DIR_GPIO_Port GPIOB
-
 /* USER CODE BEGIN Private defines */
 volatile int vx, vy, vz, va;
 volatile int x_vel, y_vel, fi_vel;
