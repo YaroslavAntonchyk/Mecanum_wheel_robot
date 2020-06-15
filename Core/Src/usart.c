@@ -130,6 +130,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 
 void pc_interface()
 {
+	incoming_byte = constraint(incoming_byte, 0, 255);
 	if ((incoming_byte >= 48) && (incoming_byte <= 57))
 		{
 			incoming_byte -= 48;

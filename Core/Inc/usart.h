@@ -33,9 +33,8 @@
 extern UART_HandleTypeDef huart2;
 
 /* USER CODE BEGIN Private defines */
-uint8_t incoming_byte, message_out[20];
-uint8_t buff;
-uint16_t message_out_len;
+uint8_t incoming_byte;
+volatile uint8_t buff;
 volatile int16_t goal_pos[3];
 
 /* USER CODE END Private defines */

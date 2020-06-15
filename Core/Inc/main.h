@@ -55,6 +55,7 @@ void Error_Handler(void);
 
 /* USER CODE BEGIN EFP */
 void control_loop();
+int constraint(int32_t var, int bottom_lim, int upper_lim);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/

@@ -23,10 +23,10 @@
 #include "tim.h"
 #include "usart.h"
 #include "gpio.h"
-
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include <stdio.h>
+#include <stdlib.h>
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -38,6 +38,8 @@
 /* USER CODE BEGIN PD */
 #define L 3
 #define D 2
+#define SPEED 50
+#define MAX 65535
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -92,10 +94,18 @@ int main(void)
   MX_USART2_UART_Init();
   MX_TIM2_Init();
   MX_TIM3_Init();
+  MX_TIM4_Init();
+  MX_TIM8_Init();
   /* USER CODE BEGIN 2 */
   HAL_UART_Receive_IT(&huart2, &incoming_byte, 1);
   HAL_TIM_Base_Start_IT(&htim2);
   HAL_TIM_Base_Start_IT(&htim3);
+  HAL_TIM_Base_Start_IT(&htim4);
+  HAL_TIM_Base_Start_IT(&htim8);
+  printf("AT+INQ\n");
+  HAL_Delay(3000);
+  printf("AT+CONN1\n");
+  HAL_Delay(3000);
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -103,8 +113,8 @@ int main(void)
   while (1)
   {
 	  printf("goal position x = %d, y = %d, fi = %d\n", goal_pos[0], goal_pos[1], goal_pos[2]);
-//	  HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);
-	  HAL_Delay(200);
+	  control_loop();
+	  HAL_Delay(100);
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -148,9 +158,10 @@ void SystemClock_Config(void)
   {
     Error_Handler();
   }
-  PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_USART2|RCC_PERIPHCLK_TIM2
-                              |RCC_PERIPHCLK_TIM34;
+  PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_USART2|RCC_PERIPHCLK_TIM8
+                              |RCC_PERIPHCLK_TIM2|RCC_PERIPHCLK_TIM34;
   PeriphClkInit.Usart2ClockSelection = RCC_USART2CLKSOURCE_PCLK1;
+  PeriphClkInit.Tim8ClockSelection = RCC_TIM8CLK_HCLK;
   PeriphClkInit.Tim2ClockSelection = RCC_TIM2CLK_HCLK;
   PeriphClkInit.Tim34ClockSelection = RCC_TIM34CLK_HCLK;
   if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInit) != HAL_OK)
@@ -166,10 +177,10 @@ void control_loop()
 	x_vel = goal_pos[0] - 100;
 	y_vel = goal_pos[1] - 100;
 	fi_vel = goal_pos[2] - 100;
-	vx = x_vel - y_vel - (L + D)*fi_vel; //forward left v1
-	vy = x_vel + y_vel - (L + D)*fi_vel; //back left v2
-	va = x_vel - y_vel + (L + D)*fi_vel; //back right v3
-	vz = x_vel + y_vel + (L + D)*fi_vel; //forward right v4
+	vx = (x_vel - y_vel - (L + D)*fi_vel)*SPEED; //forward left v1
+	vy = (x_vel + y_vel - (L + D)*fi_vel)*SPEED; //back left v2
+	va = (x_vel - y_vel + (L + D)*fi_vel)*SPEED; //back right v3
+	vz = (x_vel + y_vel + (L + D)*fi_vel)*SPEED; //forward right v4
 	// set direction for each wheel
 	if(vx < 0)
 		HAL_GPIO_WritePin(X_DIR_GPIO_Port, X_DIR_Pin, GPIO_PIN_RESET);
@@ -179,14 +190,36 @@ void control_loop()
 		HAL_GPIO_WritePin(Y_DIR_GPIO_Port, Y_DIR_Pin, GPIO_PIN_RESET);
 	else
 		HAL_GPIO_WritePin(Y_DIR_GPIO_Port, Y_DIR_Pin, GPIO_PIN_SET);
-	if(vz < 0)
+	if(vz > 0)
 		HAL_GPIO_WritePin(Z_DIR_GPIO_Port, Z_DIR_Pin, GPIO_PIN_RESET);
 	else
 		HAL_GPIO_WritePin(Z_DIR_GPIO_Port, Z_DIR_Pin, GPIO_PIN_SET);
-	if(va < 0)
+	if(va > 0)
 		HAL_GPIO_WritePin(A_DIR_GPIO_Port, A_DIR_Pin, GPIO_PIN_RESET);
 	else
 		HAL_GPIO_WritePin(A_DIR_GPIO_Port, A_DIR_Pin, GPIO_PIN_SET);
+	// set interrupts
+	vx = abs(vx);
+	TIM2->ARR = constraint(SystemCoreClock/(vx*(TIM2->PSC + 1)) - 1, 1, MAX);
+	vy = abs(vy);
+	TIM3->ARR = constraint(SystemCoreClock/(vy*(TIM3->PSC + 1)) - 1, 1, MAX);
+	vz = abs(vz);
+	TIM4->ARR = constraint(SystemCoreClock/(vz*(TIM4->PSC + 1)) - 1, 1, MAX);
+	va = abs(va);
+	TIM8->ARR = constraint(SystemCoreClock/(va*(TIM8->PSC + 1)) - 1, 1, MAX);
+
+	HAL_UART_Receive_IT(&huart2, &incoming_byte, 1);
+
+}
+
+int constraint(int32_t var, int bottom_lim, int upper_lim)
+{
+	if(var > upper_lim)
+		return upper_lim;
+	else if(var < bottom_lim)
+		return bottom_lim;
+	else
+		return var;
 }
 
 /* USER CODE END 4 */
