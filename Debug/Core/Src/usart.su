@@ -1,7 +1,8 @@
-usart.c:31:6:MX_USART2_UART_Init	8	static
-usart.c:51:6:HAL_UART_MspInit	48	static
-usart.c:83:6:HAL_UART_MspDeInit	16	static
-usart.c:109:6:send_char	16	static
-usart.c:114:5:__io_putchar	16	static
-usart.c:122:6:HAL_UART_RxCpltCallback	16	static
-usart.c:131:6:pc_interface	8	static
+usart.c:32:6:MX_USART1_UART_Init	8	static
+usart.c:53:6:MX_USART2_UART_Init	8	static
+usart.c:73:6:HAL_UART_MspInit	56	static
+usart.c:132:6:HAL_UART_MspDeInit	16	static
+usart.c:178:6:send_char	16	static
+usart.c:183:5:__io_putchar	16	static
+usart.c:191:6:HAL_UART_RxCpltCallback	16	static
+usart.c:206:6:pc_interface	8	static

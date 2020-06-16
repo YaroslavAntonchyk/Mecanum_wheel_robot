@@ -23,6 +23,7 @@
 #include "tim.h"
 #include "usart.h"
 #include "gpio.h"
+
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include <stdio.h>
@@ -38,7 +39,7 @@
 /* USER CODE BEGIN PD */
 #define L 3
 #define D 2
-#define SPEED 50
+#define SPEED 100
 #define MAX 65535
 /* USER CODE END PD */
 
@@ -96,16 +97,14 @@ int main(void)
   MX_TIM3_Init();
   MX_TIM4_Init();
   MX_TIM8_Init();
+  MX_USART1_UART_Init();
   /* USER CODE BEGIN 2 */
-  HAL_UART_Receive_IT(&huart2, &incoming_byte, 1);
+//  HAL_UART_Receive_IT(&huart2, &incoming_byte, 1);
+  HAL_UART_Receive_IT(&huart1, &incoming_byte, 1);
   HAL_TIM_Base_Start_IT(&htim2);
   HAL_TIM_Base_Start_IT(&htim3);
   HAL_TIM_Base_Start_IT(&htim4);
   HAL_TIM_Base_Start_IT(&htim8);
-  printf("AT+INQ\n");
-  HAL_Delay(3000);
-  printf("AT+CONN1\n");
-  HAL_Delay(3000);
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -158,8 +157,10 @@ void SystemClock_Config(void)
   {
     Error_Handler();
   }
-  PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_USART2|RCC_PERIPHCLK_TIM8
-                              |RCC_PERIPHCLK_TIM2|RCC_PERIPHCLK_TIM34;
+  PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_USART1|RCC_PERIPHCLK_USART2
+                              |RCC_PERIPHCLK_TIM8|RCC_PERIPHCLK_TIM2
+                              |RCC_PERIPHCLK_TIM34;
+  PeriphClkInit.Usart1ClockSelection = RCC_USART1CLKSOURCE_PCLK2;
   PeriphClkInit.Usart2ClockSelection = RCC_USART2CLKSOURCE_PCLK1;
   PeriphClkInit.Tim8ClockSelection = RCC_TIM8CLK_HCLK;
   PeriphClkInit.Tim2ClockSelection = RCC_TIM2CLK_HCLK;
@@ -208,7 +209,8 @@ void control_loop()
 	va = abs(va);
 	TIM8->ARR = constraint(SystemCoreClock/(va*(TIM8->PSC + 1)) - 1, 1, MAX);
 
-	HAL_UART_Receive_IT(&huart2, &incoming_byte, 1);
+//	HAL_UART_Receive_IT(&huart2, &incoming_byte, 1);
+	HAL_UART_Receive_IT(&huart1, &incoming_byte, 1);
 
 }
 
