@@ -37,9 +37,9 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-#define L 3
-#define D 2
-#define SPEED 100
+#define L 0.2
+#define D 0.2
+#define SPEED 150
 #define MAX 65535
 /* USER CODE END PD */
 
@@ -200,14 +200,14 @@ void control_loop()
 	else
 		HAL_GPIO_WritePin(A_DIR_GPIO_Port, A_DIR_Pin, GPIO_PIN_SET);
 	// set interrupts
-	vx = abs(vx);
-	TIM2->ARR = constraint(SystemCoreClock/(vx*(TIM2->PSC + 1)) - 1, 1, MAX);
-	vy = abs(vy);
-	TIM3->ARR = constraint(SystemCoreClock/(vy*(TIM3->PSC + 1)) - 1, 1, MAX);
-	vz = abs(vz);
-	TIM4->ARR = constraint(SystemCoreClock/(vz*(TIM4->PSC + 1)) - 1, 1, MAX);
-	va = abs(va);
-	TIM8->ARR = constraint(SystemCoreClock/(va*(TIM8->PSC + 1)) - 1, 1, MAX);
+	if (vx != 0)
+		TIM2->ARR = constraint(SystemCoreClock/(abs(vx)*(TIM2->PSC + 1)) - 1, 1, MAX);
+	if (vy != 0)
+		TIM3->ARR = constraint(SystemCoreClock/(abs(vy)*(TIM3->PSC + 1)) - 1, 1, MAX);
+	if (vz != 0)
+		TIM4->ARR = constraint(SystemCoreClock/(abs(vz)*(TIM4->PSC + 1)) - 1, 1, MAX);
+	if (va != 0)
+		TIM8->ARR = constraint(SystemCoreClock/(abs(va)*(TIM8->PSC + 1)) - 1, 1, MAX);
 
 //	HAL_UART_Receive_IT(&huart2, &incoming_byte, 1);
 	HAL_UART_Receive_IT(&huart1, &incoming_byte, 1);
